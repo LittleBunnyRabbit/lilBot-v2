@@ -1,11 +1,6 @@
 import Discord from 'discord.js';
 import { ParentCommand } from '../classes/Command';
 
-export type CommandUsage = {
-    usage: string;
-    description: string;
-};
-
 export type CommandParams = {
     msg: Discord.Message;
     args: string[];
@@ -21,11 +16,3 @@ export type CommandConfig = {
     disabled: boolean;
     function: Function;
 };
-
-export type CommandConfigTypes = {
-    normal: CommandConfig[];
-    admin: CommandConfig[];
-    games: CommandConfig[];
-};
-
-export type ClientCommands = { [keyof: string]: Discord.Collection<string, ParentCommand> };

@@ -1,14 +1,8 @@
 lilBot-v2
 
-### docker-compose.yml
-```yml
-version: '3.8'
-
-services:
-  lilbot:
-    image: {org}/{repo}:{tag}
-    environment:
-      - BOT_TOKEN=
-      - PREFIX=
+### .env
+```env
+BOT_TOKEN="DISCORD BOT TOKEN"
+PREFIX="PREFIX FOR COMMANDS"
 
 ```
