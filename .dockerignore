@@ -1,0 +1,6 @@
+node_modules
+npm-debug.log
+build/
+src/config/*.env
+report.*
+docker-compose.yml
