@@ -1,52 +1,36 @@
 import Discord from 'discord.js';
 import { logger } from '../../utils/Utils';
-import { BotClient } from './BotClient';
-import { CommandUsage, CommandTypes } from '../types/CommandTypes';
+import { CommandTypes, CommandConfig } from '../types/CommandTypes';
 
 export class ParentCommand {
     readonly name: string;
     readonly description: string;
-    readonly channels: string[] | undefined;
-    readonly uses: CommandUsage[] = [];
-    private command: Function | undefined;
-    public disabled: boolean = false;
+    readonly channels: string[];
+    readonly uses: string[][];
+    public disabled: boolean;
+    private function: Function;
     public type: CommandTypes;
 
-    public constructor(name: string, description: string, channels?: Array<string>) {
-        this.name = name.toUpperCase();
-        this.description = description;
-        this.channels = channels;
+    public constructor(command_config: CommandConfig) {
+        this.name = command_config.name.toUpperCase();
+        this.description = command_config.description;
+        this.channels = command_config.channels;
+        this.uses = command_config.uses;
+        this.function = command_config.function;
+        this.disabled = command_config.disabled;
         this.type = 'NONE';
     }
 
-    public setCommand(command: Function): ParentCommand {
-        this.command = command;
-        return this;
-    }
-
-    public addUsage(usage: string, description: string): ParentCommand {
-        this.uses.push({
-            usage,
-            description,
-        });
-        return this;
-    }
-
-    public disable(): ParentCommand {
-        this.disabled = true;
-        return this;
-    }
-
-    public execute(msg: Discord.Message, args: string[], client: BotClient) {
+    public execute(msg: Discord.Message, args: string[]) {
         const time_start: number = Date.now();
         logger.command(
             `${msg.author.username}#${msg.author.discriminator} > ${this.type} > ${this.name} > ${args.join(', ')}`
         );
         if (this.disabled) return logger.warn('Command is disabled');
-        if (!this.command) return logger.error('Command is not set');
-        if (this.channels && !this.channels.includes(msg.channel.id)) return logger.warn('Wrong channel');
+        if (!this.function) return logger.error('Command is not set');
+        if (this.channels.length > 0 && !this.channels.includes(msg.channel.id)) return logger.warn('Wrong channel');
         if (!this.canExecute(msg)) return logger.error(`${msg.author.username} can't execute that command`);
-        this.command({ msg, args, client });
+        this.function({ msg, args });
         logger.info(`${this.name} executed in ${Date.now() - time_start}ms`);
     }
 
@@ -56,8 +40,8 @@ export class ParentCommand {
 }
 
 class Normal extends ParentCommand {
-    public constructor(name: string, description: string, channels?: Array<string>) {
-        super(name, description, channels);
+    public constructor(command_config: CommandConfig) {
+        super(command_config);
         this.type = 'NORMAL';
     }
 
@@ -67,8 +51,8 @@ class Normal extends ParentCommand {
 }
 
 class Admin extends ParentCommand {
-    public constructor(name: string, description: string, channels?: Array<string>) {
-        super(name, description, channels);
+    public constructor(command_config: CommandConfig) {
+        super(command_config);
         this.type = 'ADMIN';
     }
 
@@ -79,7 +63,19 @@ class Admin extends ParentCommand {
     }
 }
 
+class Games extends ParentCommand {
+    public constructor(command_config: CommandConfig) {
+        super(command_config);
+        this.type = 'NORMAL';
+    }
+
+    canExecute(msg: Discord.Message): boolean {
+        return true;
+    }
+}
+
 export const Command = {
     Normal,
     Admin,
+    Games
 };

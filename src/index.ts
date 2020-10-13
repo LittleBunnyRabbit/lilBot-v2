@@ -1,10 +1,11 @@
 import dotenv from 'dotenv';
-import { BotClient } from './imports/classes/BotClient';
+import { createBot } from './bot/start/createBot';
+import { CustomClient } from './imports/types/ClientTypes';
 import { logger } from './utils/Utils';
 
 dotenv.config();
 logger.system('.env imported');
 
 if(process.env.PREFIX) {
-    new BotClient(process.env.PREFIX);
+    const client: CustomClient = createBot(process.env.PREFIX);
 }

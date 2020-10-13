@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import { BotClient } from "../classes/BotClient";
+import { ParentCommand } from '../classes/Command';
 
 export type CommandUsage = {
     usage: string;
@@ -9,7 +9,23 @@ export type CommandUsage = {
 export type CommandParams = {
     msg: Discord.Message;
     args: string[];
-    client: BotClient;
 };
 
-export type CommandTypes = "NONE" | "NORMAL" | "ADMIN";
+export type CommandTypes = 'NONE' | 'NORMAL' | 'ADMIN';
+
+export type CommandConfig = {
+    name: string;
+    description: string;
+    channels: string[];
+    uses: string[][];
+    disabled: boolean;
+    function: Function;
+};
+
+export type CommandConfigTypes = {
+    normal: CommandConfig[];
+    admin: CommandConfig[];
+    games: CommandConfig[];
+};
+
+export type ClientCommands = { [keyof: string]: Discord.Collection<string, ParentCommand> };

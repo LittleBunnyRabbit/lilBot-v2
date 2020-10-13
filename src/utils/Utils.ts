@@ -11,24 +11,13 @@ export const logger = {
 
 function sendLog(message: any, name: string, color: string): void {
     const spacing: string = ' '.repeat(7 - name.length);
-    const message_prefix: string = applyColor(`[${getDate()}] ${name}${spacing} |`);
+    const message_prefix: string = applyColor(`${name}${spacing} |`);
     return console.log(`${message_prefix} ${message}`);
 
     function applyColor(msg: string): string {
         const canApply = process.platform !== 'win32';
         if (!canApply) return msg;
         return `${color}${msg}${colors.RESET}`;
-    }
-
-    function getDate(): string {
-        const date: Date = new Date();
-        const day: string = `0${date.getDate()}`.slice(-2);
-        const month: string = `0${date.getMonth() + 1}`.slice(-2);
-        const year: string = `${date.getFullYear()}`;
-        const hours: string = `0${date.getHours()}`.slice(-2);
-        const minutes: string = `0${date.getMinutes()}`.slice(-2);
-        const seconds: string = `0${date.getSeconds()}`.slice(-2);
-        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     }
 }
 
