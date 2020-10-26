@@ -7,6 +7,7 @@ export const logger = {
     debug: (message: any) => sendLog(message, 'DEBUG', colors.YELLOW.BG),
     command: (message: any) => sendLog(message, 'COMMAND', colors.GREEN.FG),
     system: (message: any) => sendLog(message, 'SYSTEM', colors.CYAN.FG),
+    db: (message: any) => sendLog(message, 'DB', colors.CYAN.FG),
 };
 
 function sendLog(message: any, name: string, color: string): void {
@@ -110,4 +111,29 @@ export function getData(url: string, json: boolean, headers?: any) {
             .then(resolve)
             .catch(reject);
     });
+}
+
+export const numberToMonth: { [key: number]: string } = {
+    0: 'Unknown',
+    1: 'January',
+    2: 'February',
+    3: 'March',
+    4: 'April',
+    5: 'May',
+    6: 'June',
+    7: 'July',
+    8: 'August',
+    9: 'September',
+    10: 'October',
+    11: 'Noveber',
+    12: 'December',
+};
+
+export function addDaySuffix(day: number) {
+    const j: number = day % 10;
+    const k: number = day % 100;
+    if (j == 1 && k != 11) return day + 'st';
+    if (j == 2 && k != 12) return day + 'nd';
+    if (j == 3 && k != 13) return day + 'rd';
+    return day + 'th';
 }

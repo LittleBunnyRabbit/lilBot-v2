@@ -1,6 +1,8 @@
 import { Message, MessageEmbedOptions } from "discord.js";
+import { getUserById, updateUser } from "../../db/databaseHandlers";
 import { logger } from "../../utils/Utils";
 import { CommandConfig } from "../types/CommandTypes";
+import { lilUserJson } from "../types/UserTypes";
 
 export class Command {
     readonly _id: string;
@@ -9,6 +11,7 @@ export class Command {
     private name: string | undefined;
     private description: string | undefined;
     private is_admin: boolean | undefined;
+    private is_master: boolean | undefined;
     private disabled: boolean | undefined;
     private delete_message: boolean | undefined;
     private uses: string[][] | undefined;
@@ -23,6 +26,7 @@ export class Command {
         this.name = command_config.name;
         this.description = command_config.description;
         this.is_admin = command_config.is_admin;
+        this.is_master = command_config.is_master;
         this.disabled = command_config.disabled;
         this.delete_message = command_config.delete_message;
         this.uses = command_config.uses;
@@ -30,16 +34,26 @@ export class Command {
     }
 
     public async execute(msg: Message, args: Array<string>) {
-        logger.command(`${msg.author.username}#${msg.author.discriminator}`);
+        logger.command(
+            `${msg.author.username}#${msg.author.discriminator} ${this.name} ${this.is_admin ? "> Admin" : ""} ${args.length > 0 ? `> ${args.join(', ')}` : ""}`
+        );
+
+        const liluser: lilUserJson = await getUserById(msg.author.id);
+        if(!liluser) return logger.error(`User '${msg.author.id}' is not in the database!`);
+
 
         if(!this.canExecute(msg)) return;     
         return this.command(msg, args).then(() => {
-            try {
-                if(this.delete_message) msg.delete();
-            } catch (error) {
-                logger.error(`Failed to delete message...\n${error}`)   
-            }
+            try { if(this.delete_message) msg.delete(); } 
+            catch (error) { logger.error(`Failed to delete message...\n${error}`) }
+            this.updateUser(liluser);
         });
+    }
+
+    private async updateUser(liluser: lilUserJson) {
+        return updateUser(liluser._id, {
+            command_counter: (liluser.command_counter || 0) + 1
+        })
     }
 
     private canExecute(msg: Message): boolean {

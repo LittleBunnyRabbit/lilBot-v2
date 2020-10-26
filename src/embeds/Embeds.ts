@@ -83,3 +83,11 @@ export const SpecificHelpEmbed = (command_name: string, description: string, use
             text: `*${type}*`,
         },
     });
+
+export const BirthdaysEmbed = (description: string, footer: string): EmbedJson =>
+    EmbedBase({
+        color: 'RANDOM',
+        title: "Birthdays",
+        description: description,
+        footer: { text: footer },
+    });
