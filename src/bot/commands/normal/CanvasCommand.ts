@@ -1,6 +1,7 @@
+import { Message } from 'discord.js';
 import { TestCanvas } from '../../../canvases/Canvases';
-import { CommandParams } from '../../../imports/types/CommandTypes';
+import { Command } from '../../../imports/classes/Command';
 
-export default function CanvasCommand({ msg }: CommandParams): any {
+export default new Command("command_canvas", function(msg: Message, args: string[]) {
     return msg.channel.send(TestCanvas({ name: "Test"}).toAttachment("test"));
-}
+});

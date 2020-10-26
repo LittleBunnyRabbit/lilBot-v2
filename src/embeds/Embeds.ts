@@ -1,6 +1,7 @@
+import { MessageEmbedOptions } from 'discord.js';
 import { EmbedJson } from '../imports/types/EmbedTypes';
 
-const EmbedBase = (embed: any) => ({ embed });
+const EmbedBase = (embed: MessageEmbedOptions) => ({ embed });
 
 export const TestEmbed = (): EmbedJson =>
     EmbedBase({
@@ -52,11 +53,20 @@ export const TestEmbed = (): EmbedJson =>
         },
     });
 
-export const HelpEmbed = (fields: { name: string; value: string }[]): EmbedJson =>
-    EmbedBase({
-        color: 'RANDOM',
-        fields,
-    });
+export const HelpEmbed = (normal_commands: string, admin_commands: string): EmbedJson => EmbedBase({
+        color: "RANDOM",
+        title: "Help",
+        fields: [
+            {
+                name: "Normal:",
+                value: normal_commands || "No commands"
+            },
+            {
+                name: "Admin 🛡️",
+                value: admin_commands || "No commands"
+            }
+        ],
+});
 
 export const SpecificHelpEmbed = (command_name: string, description: string, uses: string, type: string): EmbedJson =>
     EmbedBase({

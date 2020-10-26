@@ -1,7 +1,7 @@
-import Discord from 'discord.js';
-import { ParentCommand } from '../classes/Command';
+import { Client, Collection } from 'discord.js';
+import { Command } from '../classes/Command';
 
-export type CustomClient = Discord.Client & {
+export type CustomClient = Client & {
     prefix?: string,
-    commands?: Discord.Collection<string, ParentCommand>
+    commands?: Collection<string, Command>
 };

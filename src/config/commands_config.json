@@ -1,0 +1,29 @@
+{
+    "command_test": {
+        "name": "TEST",
+        "description": "Test command",
+        "is_admin": false,
+        "disabled": false,
+        "delete_message": false,
+        "uses": [],
+        "channels": []
+    },
+    "command_canvas": {
+        "name": "CANVAS",
+        "description": "CANVAS command",
+        "is_admin": false,
+        "disabled": false,
+        "delete_message": false,
+        "uses": [],
+        "channels": []
+    },
+    "command_help": {
+        "name": "HELP",
+        "description": "HELP command",
+        "is_admin": false,
+        "disabled": false,
+        "delete_message": false,
+        "uses": [],
+        "channels": []
+    }
+}

@@ -1,43 +1,47 @@
 import Discord from 'discord.js';
-import { Command, ParentCommand } from '../../imports/classes/Command';
 import { CustomClient } from '../../imports/types/ClientTypes';
-import { commands } from './commandsConfig';
-import { events } from './eventsConfig';
+import { logger } from '../../utils/Utils';
+import { getBotCommands, getCommandConfigs } from './botCommands';
+import { getBotEvents } from './botEvents';
+import { CommandConfig } from '../../imports/types/CommandTypes';
 
-let client: CustomClient | undefined;
+let client: CustomClient;
 
-export const getClient = (): CustomClient | undefined => client;
+export const getDiscordClient = (): CustomClient => client;
 
-export function createBot(prefix: string) {
-    client = new Discord.Client();
-    client.prefix = prefix;
-
+export async function createDiscordBot(): Promise<CustomClient> {
+    client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+    client.prefix = process.env.PREFIX;
     addEvents(client);
-    client.commands = getCommands();
-
-    client.login(process.env.BOT_TOKEN);
+    addCommands(client);
+    await client.login(process.env.BOT_TOKEN);
     return client;
 }
 
-function addEvents(client: CustomClient) {
-    for(const event_name in events) client.on(event_name, events[event_name]);
-}
-
-function getCommands(): Discord.Collection<string, ParentCommand> {
-    const client_commands = new Discord.Collection<string, ParentCommand>();
-
-    const types: { [key: string]: keyof typeof Command } = {
-        Normal: "Normal",
-        Admin: "Admin",
-        Games: "Games"
-    };
-
-    for(const command_type in commands) {
-        for(const command of commands[command_type]) {
-            let command_class_type: keyof typeof Command | undefined = types[command_type];
-            client_commands.set(command.name.toUpperCase(), new Command[command_class_type](command));
+function addEvents(client: any) {
+    for(const bot_event of getBotEvents()) {
+        try { 
+            client.on(bot_event.type, bot_event.execute);
+            logger.system(`Event ${bot_event.type} added!`);
+        } catch (error) {
+            throw new Error(`Failed to add event ${bot_event.type}\n${error}`); 
         }
     }
-    
-    return client_commands;
 }
+
+function addCommands(client: any) {
+    const commands_configs: {[key: string]: CommandConfig} = getCommandConfigs();
+    client.commands = new Discord.Collection();
+
+    for(const bot_command of getBotCommands()) {
+        try {
+            const command_config: CommandConfig = commands_configs[bot_command._id] as CommandConfig;
+            bot_command.addConfig(command_config);
+            client.commands.set(command_config.name.toUpperCase(), bot_command);
+            logger.system(`Command ${bot_command._id} added!`);   
+        } catch (error) {
+            throw new Error(`Failed to add command ${bot_command._id}\n${error}`); 
+        }
+    }
+}
+

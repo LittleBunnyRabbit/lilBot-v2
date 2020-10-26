@@ -1,58 +1,30 @@
-import { ParentCommand } from '../../../imports/classes/Command';
-import { HelpEmbed, SpecificHelpEmbed } from '../../../embeds/Embeds';
-import { CommandParams } from '../../../imports/types/CommandTypes';
+import { Command } from '../../../imports/classes/Command';
+import { Message } from 'discord.js';
+import { getDiscordClient } from '../../start/createBot';
 import { CustomClient } from '../../../imports/types/ClientTypes';
-import { getClient } from '../../start/createBot';
-import { logger } from '../../../utils/Utils';
+import { HelpEmbed } from '../../../embeds/Embeds';
 
-export default function HelpCommand({ msg, args }: CommandParams): any {
-    const client: CustomClient | undefined = getClient();
-    if(!client) return logger.error("Failed to fetch client");
-    const command_name: string | undefined = args?.shift()?.toUpperCase();
-    if (command_name) return msg.channel.send(listOne(client, command_name));
-    return msg.channel.send(listAll(client));
+export default new Command("command_help", function(msg: Message, args: string[]) {
+    const client: CustomClient =  getDiscordClient();
+    if(args?.length > 0) return sendSpecific(client, msg, args[0]?.toUpperCase());
+    else return sendAll(client, msg);
+});
+
+async function sendSpecific(client: CustomClient, msg: Message, command_name: string) {
+    if(!client.commands?.has(command_name)) return msg.channel.send("That command doesn't exist!");
+    msg.channel.send(client.commands.get(command_name)?.getEmbed());
 }
 
-function listAll(client: CustomClient) {
-    const filtered_commands: any = {};
-    client.commands?.forEach((command: ParentCommand) => {
-        if (!filtered_commands[command.type]) filtered_commands[command.type] = [];
-        filtered_commands[command.type].push(formatCommand(command));
-    });
+async function sendAll(client: CustomClient, msg: Message) {
 
-    const fields = [];
-    for (const commands_type in filtered_commands) {
-        fields.push({
-            name: `${capitalize(commands_type)}:`,
-            value: `**${filtered_commands[commands_type].join(', ')}**`,
-        });
-    }
+    const admin_commands: string[] = [];
+    const normal_commands: string[] = [];
 
-    return HelpEmbed(fields);
+    client.commands?.forEach((command: Command, command_name: string) => {
+        const command_string: string = `**${command.getName()}**`;
+        if(command.isAdmin()) admin_commands.push(command_name);
+        else normal_commands.push(command_name);
+    }); 
 
-    function formatCommand(command: ParentCommand) {
-        if (command.disabled) return `~~${command.name}~~`;
-        return command.name;
-    }
-
-    function capitalize(value: string): string {
-        value = value.toLowerCase();
-        return value.charAt(0).toUpperCase() + value.slice(1);
-    }
-}
-
-function listOne(client: CustomClient, command_name: string) {
-    const command: ParentCommand | undefined = client.commands?.get(command_name);
-    if (!command) return;
-    const command_uses: string =
-        command.uses.length > 0
-            ? command.uses.map((use: string[]) => `**${client?.prefix}${use[0]}:** ${use[1]}`).join('\n')
-            : 'Unknown';
-
-    return SpecificHelpEmbed(getCommandName(), command.description, command_uses, command.type);
-
-    function getCommandName(): string {
-        if (command?.disabled) return `${command?.name} (DISABLED)`;
-        return `${command?.name}`;
-    }
+    msg.channel.send(HelpEmbed(normal_commands.sort().join(", "), admin_commands.sort().join(", ")));
 }

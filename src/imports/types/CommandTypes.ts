@@ -1,18 +1,9 @@
-import Discord from 'discord.js';
-import { ParentCommand } from '../classes/Command';
-
-export type CommandParams = {
-    msg: Discord.Message;
-    args: string[];
-};
-
-export type CommandTypes = 'NONE' | 'NORMAL' | 'ADMIN';
-
 export type CommandConfig = {
     name: string;
     description: string;
-    channels: string[];
-    uses: string[][];
+    is_admin: boolean;
     disabled: boolean;
-    function: Function;
+    delete_message: boolean;
+    uses: string[][];
+    channels: string[];
 };
